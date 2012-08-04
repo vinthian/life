@@ -33,7 +33,7 @@ class Life(object):
         new_grid = LifeGrid(self.grid.width, self.grid.height)
         for y in range(self.grid.height):
             for x in range(self.grid.width):
-                neighbor_count = self._neighbor_count(x, y)
+                neighbor_count = self.neighbor_count(x, y)
                 if self.grid[x, y] == 1:
                     # Any live cell with fewer than two live neighbours dies,
                     #   as if caused by under-population.
@@ -52,7 +52,7 @@ class Life(object):
         self.grid = new_grid
         self.generation += 1
 
-    def _neighbor_count(self, x, y):
+    def neighbor_count(self, x, y):
         neighbor_pos = [(x - 1, y - 1), (x - 1, y), (x - 1, y + 1),
                         (x,     y - 1),             (x,     y + 1),
                         (x + 1, y - 1), (x + 1, y), (x + 1, y + 1)]
@@ -65,7 +65,7 @@ class Life(object):
         for y in range(self.grid.height):
             row = ""
             for x in range(self.grid.width):
-                row += (str(self._neighbor_count(x, y)) if self.grid[x, y]
+                row += (str(self.neighbor_count(x, y)) if self.grid[x, y]
                         else chr(183))
             print(row)
 
