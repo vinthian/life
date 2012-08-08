@@ -4,30 +4,35 @@ class LifeGrid(BitArray2D):
     def __init__(self, width, height):
         self._alive_set = set()
         self._dirty_set = set()
-        super().__init__(width, height)
-
         # Decent performance boost when pre-defining ranges
         self.x_range = range(0, self._width)
         self.y_range = range(0, self._height)
         self.range_3 = range(3)
 
+        super().__init__(width, height)
+
     def __setitem__(self, coords, value):
         x, y = coords
+        # Check bounds
         if x not in self.x_range or y not in self.y_range:
             return
 
+        # Update _dirty_set, mark neighbors as dirty
         for near_x, near_y in [(x - 1 + i, y - 1 + j)
                                for i in self.range_3 for j in self.range_3]:
+            # For coordinates that are in bounds
             if near_x in self.x_range and near_y in self.y_range:
                 if value and coords not in self._alive_set:
                     self._dirty_set.add((near_x, near_y))
                 if not value and coords in self._alive_set:
                     if (near_x, near_y) in self._dirty_set:
                         self._dirty_set.remove((near_x, near_y))
+        # Update _alive_set
         if value and coords not in self._alive_set:
             self._alive_set.add(coords)
         if not value and coords in self._alive_set:
             self._alive_set.add(coords)
+
         super().__setitem__(coords, value)
 
     def __getitem__(self, coords):
@@ -47,7 +52,7 @@ class LifeGrid(BitArray2D):
 
 
 class Life(object):
-    def __init__(self, width = 20, height = 10):
+    def __init__(self, width=20, height=10):
         self.grid = LifeGrid(width, height)
         self.generation = 0
 
@@ -60,17 +65,14 @@ class Life(object):
         return self.grid._dirty_set
 
     def neighbor_count(self, x, y):
-        neighbor_pos = [(x - 1, y - 1), (x - 1, y), (x - 1, y + 1),
-                        (x,     y - 1),             (x,     y + 1),
-                        (x + 1, y - 1), (x + 1, y), (x + 1, y + 1)]
-        neighbor_count = 0
-        for coords in neighbor_pos:
-            neighbor_count += self.grid[coords]
-        return neighbor_count
+        return self.grid[x - 1, y - 1] + self.grid[x - 1, y    ] + \
+               self.grid[x - 1, y + 1] + self.grid[x    , y - 1] + \
+               self.grid[x    , y + 1] + self.grid[x + 1, y - 1] + \
+               self.grid[x + 1, y    ] + self.grid[x + 1, y + 1]
 
     def next(self):
         new_grid = LifeGrid(self.grid.width, self.grid.height)
-        for coords in self.grid._alive_set.union(self.grid._dirty_set):
+        for coords in self.grid._dirty_set:
             neighbor_count = self.neighbor_count(*coords)
             if self.grid[coords] == 1:
                 # Any live cell with fewer than two live neighbours dies,
