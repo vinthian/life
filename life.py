@@ -6,16 +6,19 @@ class LifeGrid(BitArray2D):
         self._dirty_set = set()
         super().__init__(width, height)
 
+        # Decent performance boost when pre-defining ranges
+        self.x_range = range(0, self._width)
+        self.y_range = range(0, self._height)
+        self.range_3 = range(3)
+
     def __setitem__(self, coords, value):
         x, y = coords
-        if coords[0] not in range(0, self._width) or \
-                coords[1] not in range(0, self._height):
+        if x not in self.x_range or y not in self.y_range:
             return
 
         for near_x, near_y in [(x - 1 + i, y - 1 + j)
-                               for i in range(3) for j in range(3)]:
-            if near_x in range(0, self._width) and \
-                    near_y in range(0, self._height):
+                               for i in self.range_3 for j in self.range_3]:
+            if near_x in self.x_range and near_y in self.y_range:
                 if value and coords not in self._alive_set:
                     self._dirty_set.add((near_x, near_y))
                 if not value and coords in self._alive_set:
@@ -29,7 +32,7 @@ class LifeGrid(BitArray2D):
 
     def __getitem__(self, coords):
         x, y = coords
-        if x not in range(0, self._width) or y not in range(0, self._height):
+        if x not in self.x_range or y not in self.y_range:
             return False
         else:
             return super().__getitem__(coords)
@@ -88,24 +91,14 @@ class Life(object):
         self.generation += 1
         return True
 
-    def _glider(self, x = 0, y = 0):
-        # Clear out 3x3 area
-        for j in range(3):
-            for i in range(3):
-                self.grid[x + i, y + j] = 0
-        # Create Glider
+    def _glider(self, x=0, y=0):
         self.grid[x,     y + 2] = 1 #  X
         self.grid[x + 1, y + 2] = 1 #   X
         self.grid[x + 2, y + 2] = 1 # XXX
         self.grid[x + 2, y + 1] = 1
         self.grid[x + 1, y    ] = 1
 
-    def _small_explorer(self, x = 0, y = 0):
-        # Clear out 3x4 area
-        for j in range(4):
-            for i in range(3):
-                self.grid[x + i, y + j] = 0
-        # Create Small Explorer
+    def _small_explorer(self, x=0, y=0):
         self.grid[x + 1, y    ] = 1 #  X
         self.grid[x    , y + 1] = 1 # XXX
         self.grid[x + 1, y + 1] = 1 # X X
@@ -113,6 +106,27 @@ class Life(object):
         self.grid[x    , y + 2] = 1
         self.grid[x + 2, y + 2] = 1
         self.grid[x + 1, y + 3] = 1
+
+    def _osc1(self, x=0, y=0):
+        self.grid[x, y    ] = 1 # X
+        self.grid[x, y + 1] = 1 # X
+        self.grid[x, y + 2] = 1 # X
+
+    def _osc2(self, x=0, y=0):
+        self.grid[x + 1, y    ] = 1 #  XXX
+        self.grid[x + 2, y    ] = 1 # XXX
+        self.grid[x + 3, y    ] = 1
+        self.grid[x    , y + 1] = 1
+        self.grid[x + 1, y + 1] = 1
+        self.grid[x + 2, y + 1] = 1
+
+    def _osc3(self, x=0, y=0):
+        self.grid[x    , y    ] = 1 # XX
+        self.grid[x + 1, y    ] = 1 # X
+        self.grid[x    , y + 1] = 1 #    X
+        self.grid[x + 2, y + 3] = 1 #   XX
+        self.grid[x + 3, y + 3] = 1
+        self.grid[x + 3, y + 2] = 1
 
     def _gospers_glider_gun(self, x=0, y=0):
         self.grid[x + 1, y + 5] = 1 # XX

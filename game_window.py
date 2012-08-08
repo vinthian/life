@@ -32,21 +32,37 @@ class Game:
 
         # Life
         self.life = Life(self.width, self.height)
+        # Generate some patterns
+        for x in range(50):
+            i = randint(0, 4)
+            if i == 0:
+                self.life._glider(
+                    randint(0, self.width - 3), randint(0, self.height - 3))
+            if i == 1:
+                self.life._small_explorer(
+                    randint(0, self.width - 13), randint(0, self.height - 13))
+            if i == 2:
+                self.life._osc1(
+                    randint(0, self.width - 3), randint(0, self.height - 3))
+            if i == 3:
+                self.life._osc2(
+                    randint(0, self.width - 4), randint(0, self.height - 4))
+            if i == 4:
+                self.life._osc3(
+                    randint(0, self.width - 4), randint(0, self.height - 4))
         self.life._gospers_glider_gun()
-        """
-        for x in range(5):
-        life._glider(randint(0, width - 3), randint(0, height - 3))
-        life._small_explorer(randint(0, width - 13), randint(0, height - 13))
-        """
 
         # Auto-start
         if start:
             self.main()
 
     def draw_pixel(self, x, y, color):
-        pygame.draw.rect(self.game_window, color,
-                         (x * self.pixel_size, y * self.pixel_size,
-                          self.pixel_size, self.pixel_size))
+        if self.pixel_size == 1:
+            self.game_window.set_at((x, y), color)
+        else:
+            pygame.draw.rect(self.game_window, color,
+                             (x * self.pixel_size, y * self.pixel_size,
+                              self.pixel_size, self.pixel_size))
 
     def key_helper(self):
         for event in pygame.event.get():
@@ -55,7 +71,7 @@ class Game:
                 self.paused = False
             elif event.type == KEYDOWN:
                 if event.key == K_1:
-                    if self.speed - 15 > 0:
+                    if self.speed - 15 >= 0:
                         self.speed -= 15
                 if event.key == K_2:
                     self.speed += 15
@@ -69,10 +85,19 @@ class Game:
                         self.draw_update()
                 if event.key == K_p:
                     self.paused = not self.paused
+                if event.key == K_SPACE:
+                    if self.paused:
+                        self.life.next()
+                        self.draw_update()
                 if event.key == K_ESCAPE:
                     pygame.event.post(pygame.event.Event(QUIT))
 
     def draw_update(self):
+        pygame.display.set_caption("gen: %s - fps: %s/%s - updates: %s" %
+                                   (self.life.generation,
+                                    round(self.fps_clock.get_fps()),
+                                    self.speed,
+                                    self.life.update_count))
         self.game_window.fill(self.white_color)
         for x, y in self.life.dirty_list:
             if self.life.grid[x, y] == 1:
@@ -91,11 +116,6 @@ class Game:
     def main(self):
         # Main Game Loop
         while self.running:
-            pygame.display.set_caption("gen: %s - fps: %s/%s - updates: %s" %
-                                       (self.life.generation,
-                                        round(self.fps_clock.get_fps()),
-                                        self.speed,
-                                        self.life.update_count))
             self.draw_update()
             self.key_helper()
 

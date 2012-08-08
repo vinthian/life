@@ -6,7 +6,7 @@ class BitArrayIndexOutOfBoundsException(Exception):
 class BitArray(object):
     def __init__(self, size):
         self._bits = size
-        self._bytes = math.ceil(size / 8)
+        self._bytes = int(math.ceil(size / 8))
         self._data = bytearray(self._bytes)
 
     def _check_bounds(self, i):
@@ -26,6 +26,9 @@ class BitArray(object):
             self._data[i // 8] |= (1 << (i % 8))
         else:
             self._data[i // 8] &= ~(1 << (i % 8))
+
+    def __len__(self):
+        return self._bits
 
 
 class BitArray2D(BitArray):
