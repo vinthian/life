@@ -15,7 +15,7 @@ class Game:
         self.running = True
         self.paused = False
         self.color = 0
-        self.speed = 30
+        self.speed = 0
 
         # Colors
         self.black_color = pygame.Color(0, 0, 0)

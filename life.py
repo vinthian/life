@@ -4,12 +4,13 @@ class LifeGrid(BitArray2D):
     def __init__(self, width, height):
         self._alive_set = set()
         self._dirty_set = set()
+
+        super().__init__(width, height)
+
         # Decent performance boost when pre-defining ranges
         self.x_range = range(0, self._width)
         self.y_range = range(0, self._height)
         self.range_3 = range(3)
-
-        super().__init__(width, height)
 
     def __setitem__(self, coords, value):
         x, y = coords
@@ -74,7 +75,7 @@ class Life(object):
         new_grid = LifeGrid(self.grid.width, self.grid.height)
         for coords in self.grid._dirty_set:
             neighbor_count = self.neighbor_count(*coords)
-            if self.grid[coords] == 1:
+            if self.grid[coords]:
                 # Any live cell with fewer than two live neighbours dies,
                 #   as if caused by under-population.
                 # Any live cell with more than three live neighbours dies,
